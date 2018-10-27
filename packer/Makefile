@@ -6,7 +6,10 @@ DEFAULT:
 	@echo Set the environment variable DC_NAME to name the images
 
 .PHONY: aws
-aws: aws_consul_server aws_without_connect aws_with_connect
+aws: aws_vault_server aws_consul_server aws_without_connect aws_with_connect
+
+.PHONY: aws_vault_server
+aws_vault_server: aws_consul_client .built.aws_vault_server
 
 .PHONY: aws_without_connect
 aws_without_connect: aws_client_mongodb_noconnect aws_client_product_noconnect aws_client_webclient_noconnect aws_client_listing_noconnect
@@ -46,6 +49,10 @@ aws_client_webclient_connect: aws_consul_client aws_client_webclient_noconnect .
 
 .PHONY: aws_client_webclient_noconnect
 aws_client_webclient_noconnect: aws_consul_client .built.aws_client_webclient_noconnect
+
+.built.aws_vault_server: vault_server.json files/install_vault.sh files/vault.hcl files/vault.service files/init_vault.sh
+	DC_NAME=east packer build -only amazon-ebs vault_server.json
+	touch .built.aws_vault_server
 
 .built.aws_consul_base: consul_base.json files/install_base.sh files/install_consul.sh
 	DC_NAME=east packer build -only amazon-ebs consul_base.json

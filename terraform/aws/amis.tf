@@ -1,3 +1,13 @@
+data "aws_ami" "vault" {
+    most_recent = true
+    owners      = ["753646501470"] # hc-sc-demos-2018
+
+    filter {
+        name   = "name"
+        values = ["east-aws-ubuntu-vault-server-*"]
+    }
+}
+
 data "aws_ami" "consul" {
     most_recent = true
     owners      = ["753646501470"] # hc-sc-demos-2018

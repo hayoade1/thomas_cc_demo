@@ -1,0 +1,3 @@
+path "mongo/creds/catalog" {
+  capabilities = ["read"]
+}

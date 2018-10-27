@@ -63,18 +63,8 @@
       },
       {
         "type": "file",
-        "source": "files/init_vault.sh",
-        "destination": "/tmp/init_vault.sh"
-      },
-      {
-        "type": "file",
         "source": "files/vault.service",
         "destination": "/tmp/vault.service"
-      },
-      {
-        "type": "file",
-        "source": "files/catalog.policy",
-        "destination": "/tmp/catalog.policy"
       },
       {
         "type": "shell",

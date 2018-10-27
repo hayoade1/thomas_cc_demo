@@ -5,12 +5,13 @@ resource aws_instance "mongo" {
     count			= "${var.client_db_count}"
     instance_type		= "${var.client_machine_type}"
     key_name			= "${var.ssh_key_name}"
-    subnet_id			= "${element(data.aws_subnet_ids.default.ids, count.index)}" 
+    subnet_id			= "${element(data.aws_subnet_ids.default.ids, count.index)}"
     associate_public_ip_address = true
     vpc_security_group_ids      = ["${aws_security_group.mongo_server_sg.id}"]
     iam_instance_profile        = "${aws_iam_instance_profile.consul_client_iam_profile.name}"
-    
+
     tags = "${merge(var.hashi_tags, map("Name", "${var.project_name}-mongo-server-${count.index}"), map("role", "mongo-server"), map("consul-cluster-name", replace("consul-cluster-${var.project_name}-${var.hashi_tags["owner"]}", " ", "")))}"
+    user_data = "${file("${path.module}/init_mongo.sh")}"
 }
 
 output "mongo_servers" {

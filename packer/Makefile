@@ -50,7 +50,7 @@ aws_client_webclient_connect: aws_consul_client aws_client_webclient_noconnect .
 .PHONY: aws_client_webclient_noconnect
 aws_client_webclient_noconnect: aws_consul_client .built.aws_client_webclient_noconnect
 
-.built.aws_vault_server: vault_server.json files/install_vault.sh files/vault.hcl files/vault.service files/init_vault.sh
+.built.aws_vault_server: vault_server.json files/install_vault.sh files/vault.hcl files/vault.service
 	DC_NAME=east packer build -only amazon-ebs vault_server.json
 	touch .built.aws_vault_server
 

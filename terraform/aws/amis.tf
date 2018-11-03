@@ -48,6 +48,16 @@ data "aws_ami" "product-api-noconnect" {
     }
 }
 
+data "aws_ami" "product-api-noconnect" {
+    most_recent = true
+    owners      = ["753646501470"] # hc-sc-demos-2018
+
+    filter {
+        name   = "name"
+        values = ["east-aws-ubuntu-product-envconsul-noconnect-*"]
+    }
+}
+
 data "aws_ami" "product-api-connect" {
     most_recent = true
     owners      = ["753646501470"] # hc-sc-demos-2018
@@ -75,6 +85,16 @@ data "aws_ami" "listing-api-noconnect" {
     filter {
         name   = "name"
         values = ["east-aws-ubuntu-listing-server-noconnect-*"]
+    }
+}
+
+data "aws_ami" "listing-api-noconnect-envconsul" {
+    most_recent = true
+    owners      = ["753646501470"] # hc-sc-demos-2018
+
+    filter {
+        name   = "name"
+        values = ["east-aws-ubuntu-listing-envconsul-noconnect-*"]
     }
 }
 

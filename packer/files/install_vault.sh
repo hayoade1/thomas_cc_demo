@@ -4,7 +4,7 @@ export VAULT_VERSION="0.11.4"
 
 # Setup pre-requisites
 apt-get update
-apt-get install -y git unzip curl jq dnsutils wget
+apt-get install -y git unzip curl jq dnsutils
 
 # Add Vault user and vault.d directory:
 useradd --system --home /etc/vault.d --shell /bin/false vault

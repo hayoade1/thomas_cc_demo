@@ -1,3 +1,5 @@
+connect/*
+no-connect/*
 *~
 *.DS_Store
 packer/binaries/*

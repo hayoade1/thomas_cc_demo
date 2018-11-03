@@ -32,6 +32,9 @@ aws_client_listing_connect: aws_consul_client aws_client_listing_noconnect .buil
 .PHONY: aws_client_listing_noconnect
 aws_client_listing_noconnect: aws_consul_client .built.aws_client_listing_noconnect
 
+.PHONY: aws_client_listing_noconnect_envconsul
+aws_client_listing_noconnect_envconsul: aws_consul_client .built.aws_client_listing_noconnect_envconsul
+
 .PHONY: aws_client_mongodb_connect
 aws_client_mongodb_connect: aws_consul_client aws_client_mongodb_noconnect .built.aws_client_mongodb_connect
 
@@ -43,6 +46,9 @@ aws_client_product_connect: aws_consul_client aws_client_product_noconnect .buil
 
 .PHONY: aws_client_product_noconnect
 aws_client_product_noconnect: aws_consul_client .built.aws_client_product_noconnect
+
+.PHONY: aws_client_product_noconnect_envconsul
+aws_client_product_noconnect_envconsul: aws_consul_client .built.aws_client_product_noconnect_envconsul
 
 .PHONY: aws_client_webclient_connect
 aws_client_webclient_connect: aws_consul_client aws_client_webclient_noconnect .built.aws_client_webclient_connect
@@ -74,6 +80,10 @@ aws_client_webclient_noconnect: aws_consul_client .built.aws_client_webclient_no
 	DC_NAME=east packer build -only amazon-ebs client_listing_noconnect.json
 	touch .built.aws_client_listing_noconnect
 
+.built.aws_client_listing_noconnect_envconsul: client_listing_noconnect_envconsul.json files/install_node.sh services/listing-noconnect.hcl files/listing.service-noconnect
+	DC_NAME=east packer build -only amazon-ebs client_listing_noconnect_envconsul.json
+	touch .built.aws_client_listing_noconnect_envconsul
+
 .built.aws_client_listing_connect: client_listing_connect.json services/listing-connect.hcl files/listing.service-connect
 	DC_NAME=east packer build -only amazon-ebs client_listing_connect.json
 	touch .built.aws_client_listing_connect
@@ -94,6 +104,10 @@ aws_client_webclient_noconnect: aws_consul_client .built.aws_client_webclient_no
 	DC_NAME=east packer build -only amazon-ebs client_product_noconnect.json
 	touch .built.aws_client_product_noconnect
 
+.built.aws_client_product_noconnect_envconsul: client_product_noconnect_envconsul.json services/product-noconnect.hcl files/product.service-noconnect files/install_products.sh files/install_env_consul_template.sh
+	DC_NAME=east packer build -only amazon-ebs client_product_noconnect_envconsul.json
+	touch .built.aws_client_product_noconnect_envconsul
+
 .built.aws_client_webclient_connect: client_webclient_connect.json services/web_client-connect.hcl files/web_client.service-connect
 	DC_NAME=east packer build -only amazon-ebs client_webclient_connect.json
 	touch .built.aws_client_webclient_connect
@@ -106,6 +120,3 @@ $(ENCRYPT_CONFIG):
 	$(if $(shell PATH=$(PATH) which consul),,$(error "No consul in PATH"))
 	@echo Making encryption key
 	echo "encrypt = $$(consul keygen)" > $(ENCRYPT_CONFIG)
-
-
-

@@ -26,7 +26,7 @@ systemctl restart mongod
 # Install Vault client
 apt-get update -y
 apt-get install curl jq -y
-curl -v "https://releases.hashicorp.com/vault/${vault_client_version}/vault_${vault_client_version}_linux_amd64.zip -o vault.zip"
+curl -v -o vault.zip "https://releases.hashicorp.com/vault/${vault_client_version}/vault_${vault_client_version}_linux_amd64.zip"
 unzip vault.zip
 chown root:root vault
 mv vault /usr/local/bin/vault

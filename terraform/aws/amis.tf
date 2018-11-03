@@ -48,7 +48,7 @@ data "aws_ami" "product-api-noconnect" {
     }
 }
 
-data "aws_ami" "product-api-noconnect" {
+data "aws_ami" "product-api-noconnect-envconsul" {
     most_recent = true
     owners      = ["753646501470"] # hc-sc-demos-2018
 

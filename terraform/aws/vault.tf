@@ -1,5 +1,15 @@
 # Deploy a Vault Server
 
+# Render userdata
+resource "random_pet" "prefix" {}
+data "template_file" "vault_startup_script" {
+  template = "${file("${path.module}/init_vault.tpl")}"
+  vars {
+    consul_server_ip0 = "${aws_instance.consul.0.private_ip}"
+    vault_path = "vault-${random_pet.prefix.id}"
+  }
+}
+
 resource aws_instance "vault" {
     ami       = "${data.aws_ami.vault.id}"
     count			= "1"
@@ -11,7 +21,7 @@ resource aws_instance "vault" {
     iam_instance_profile        = "${aws_iam_instance_profile.consul_client_iam_profile.name}"
 
     tags = "${merge(var.hashi_tags, map("Name", "${var.project_name}-vault-server-${count.index}"), map("role", "vault-server"), map("consul-cluster-name", replace("consul-cluster-${var.project_name}-${var.hashi_tags["owner"]}", " ", "")))}"
-    user_data  = "${file("${path.module}/init_vault.sh")}
+    user_data = "${data.template_file.vault_startup_script.rendered}"
 }
 
 output "vault_servers" {

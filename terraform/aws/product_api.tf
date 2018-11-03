@@ -2,7 +2,7 @@
 
 # Render userdata
 # Note: the mongo_server_ip is provided only to create a dependency
-data "template_file" "startup_script" {
+data "template_file" "product_startup_script" {
   template = "${file("${path.module}/init_products.tpl")}"
   vars {
     mongo_server_ip = "${aws_instance.mongo.0.private_ip}"
@@ -20,7 +20,7 @@ resource aws_instance "product-api" {
     iam_instance_profile        = "${aws_iam_instance_profile.consul_client_iam_profile.name}"
 
     tags = "${merge(var.hashi_tags, map("Name", "${var.project_name}-product-api-server-${count.index}"), map("role", "product-api-server"), map("consul-cluster-name", replace("consul-cluster-${var.project_name}-${var.hashi_tags["owner"]}", " ", "")))}"
-    user_data = "${data.template_file.startup_script.rendered}"
+    user_data = "${data.template_file.product_startup_script.rendered}"
 }
 
 output "product_api_servers" {

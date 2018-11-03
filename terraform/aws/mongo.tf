@@ -1,10 +1,11 @@
 # Deploy a MongoDB Server
 
 # Render userdata
-data "template_file" "startup_script" {
+data "template_file" "mongo_startup_script" {
   template = "${file("${path.module}/init_mongo.tpl")}"
   vars {
     vault_server_ip = "${aws_instance.vault.0.private_ip}"
+    vault_client_version = "0.11.4"
   }
 }
 
@@ -19,7 +20,7 @@ resource aws_instance "mongo" {
     iam_instance_profile        = "${aws_iam_instance_profile.consul_client_iam_profile.name}"
 
     tags = "${merge(var.hashi_tags, map("Name", "${var.project_name}-mongo-server-${count.index}"), map("role", "mongo-server"), map("consul-cluster-name", replace("consul-cluster-${var.project_name}-${var.hashi_tags["owner"]}", " ", "")))}"
-    user_data = "${data.template_file.startup_script.rendered}"
+    user_data = "${data.template_file.mongo_startup_script.rendered}"
 }
 
 output "mongo_servers" {

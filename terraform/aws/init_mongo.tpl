@@ -68,11 +68,12 @@ consul kv put config/listing/catalog_token $(cat /tmp/catalog_token)
 
 vault write mongo/roles/catalog \
     db_name=ec2-dev-mongo \
-    creation_statements='{ "db": "admin", "roles": [{"role": "read", "db": "bbthe90s"}] }' \
-    default_ttl="1m" \
-    max_ttl="2m"
+    creation_statements='{ "db": "admin", "roles": [{ "role": "readWrite" }, {"role": "read", "db": "bbthe90s"}] }' \
+    default_ttl="2m" \
+    max_ttl="5m"
 
 ## Test mongo using new credentials:
+export VAULT_ADDR=http://active.vault.service.consul:8200
 export VAULT_TOKEN=$(cat /tmp/catalog_token)
 vault token lookup
 vault read -format=json mongo/creds/catalog > /tmp/catalogtest.txt

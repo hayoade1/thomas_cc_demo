@@ -58,18 +58,8 @@
       },
       {
         "type": "file",
-        "source": "files/product_envconsul.hcl",
-        "destination": "/tmp/product_envconsul.hcl"
-      },
-      {
-        "type": "file",
-        "source": "files/product_wrapper.sh",
-        "destination": "/tmp/product_wrapper.sh"
-      },
-      {
-        "type": "file",
-        "source": "files/install_env_consul_template.sh",
-        "destination": "/tmp/install_env_consul_template.sh"
+        "source": "files/install_client_tools.sh",
+        "destination": "/tmp/install_client_tools.sh"
       },
       {
         "type": "file",
@@ -85,15 +75,14 @@
         "type": "shell",
         "inline": [
           "sudo chmod a+x /tmp/install_products.sh",
-          "sudo chmod a+x /tmp/product_wrapper.sh",
           "sudo /tmp/install_products.sh",
 	  "sudo rm -f /tmp/install_products.sh",
           "sudo mv /tmp/product.hcl /etc/consul/product.hcl",
 	  "sudo mv /tmp/product.service /lib/systemd/system/product.service",
           "sudo chown -R consul:consul /etc/consul",
           "sudo chown -R ubuntu:ubuntu /tmp",
-          "sudo chmod a+x /tmp/install_env_consul_template.sh",
-          "sudo rm -f /tmp/install_env_consul_template.sh",
+          "sudo chmod a+x /tmp/install_client_tools.sh",
+          "sudo /tmp/install_client_tools.sh",
 	  "sudo systemctl daemon-reload",
 	  "sudo systemctl enable product.service",
           "sudo systemctl enable consul",

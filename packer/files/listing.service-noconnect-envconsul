@@ -13,5 +13,5 @@ Environment=DB_URL=mongodb.service.consul
 Environment=DB_PORT=27017
 Type=simple
 User=ubuntu
-ExecStart=/usr/local/bin/envconsul -config /tmp/listing_envconsul.hcl
+ExecStart=/usr/local/bin/envconsul -config /opt/listing-service/listing_envconsul.hcl
 Restart=always

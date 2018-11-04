@@ -58,18 +58,8 @@
       },
       {
         "type": "file",
-        "source": "files/listing_envconsul.hcl",
-        "destination": "/tmp/listing_envconsul.hcl"
-      },
-      {
-        "type": "file",
-        "source": "files/listing_wrapper.sh",
-        "destination": "/tmp/listing_wrapper.sh"
-      },
-      {
-        "type": "file",
-        "source": "files/install_env_consul_template.sh",
-        "destination": "/tmp/install_env_consul_template.sh"
+        "source": "files/install_client_tools.sh",
+        "destination": "/tmp/install_client_tools.sh"
       },
       {
         "type": "file",
@@ -85,16 +75,15 @@
         "type": "shell",
         "inline": [
           "sudo chmod a+x /tmp/install_node.sh",
-          "sudo chmod a+x /tmp/listing_wrapper.sh",
           "sudo /tmp/install_node.sh",
 	  "sudo rm -f /tmp/install_node.sh",
           "sudo mv /tmp/listing.hcl /etc/consul/listing.hcl",
 	  "sudo mv /tmp/listing.service /lib/systemd/system/listing.service",
           "sudo chown -R consul:consul /etc/consul",
           "sudo chown -R ubuntu:ubuntu /tmp",
-          "sudo chmod a+x /tmp/install_env_consul_template.sh",
-          "sudo rm -f /tmp/install_env_consul_template.sh",
-	  "sudo systemctl daemon-reload",
+          "sudo chmod a+x /tmp/install_client_tools.sh",
+          "sudo /tmp/install_client_tools.sh",
+	        "sudo systemctl daemon-reload",
           "sudo systemctl enable consul",
           "sudo systemctl enable consul_enable_acl.service",
 	  "sudo systemctl enable listing.service",

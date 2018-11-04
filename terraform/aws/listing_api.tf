@@ -6,7 +6,6 @@ data "template_file" "listing_startup_script" {
   template = "${file("${path.module}/init_listing.tpl")}"
   vars {
     mongo_server_ip = "${aws_instance.mongo.0.private_ip}"
-    vault_client_version = "0.11.4"
   }
 }
 

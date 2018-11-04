@@ -41,7 +41,7 @@
         "ami_name": "{{ user `dc_name` }}-aws-ubuntu-product-envconsul-noconnect-{{timestamp}}",
         "tags": {
             "Name": "CC Demo Ubuntu Product Server - Without Consul Connect + Envconsul and Consul-Template",
-            "owner": "thomas@hashicorp.com",
+            "owner": "kawsar@hashicorp.com",
             "project": "CC Demo SE East Quarterly Training",
             "Base_AMI_Name": "{{ .SourceAMIName }}",
             "Base_AMI": "{{ .SourceAMI }}",

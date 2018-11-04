@@ -1,8 +1,13 @@
 #! /bin/bash
 cd /tmp
 
-# Download updated code:
+# Stop product service if up already
+systemctl stop product.service
+
+# Download updated code and Vault library:
+pip3 install hvac
 cd /home/ubuntu/src
+rm -rf product-service
 git clone https://github.com/kawsark/product-service.git
 touch /tmp/product_wrapper.pid
 chown -R ubuntu:ubuntu .
@@ -11,9 +16,9 @@ chown -R ubuntu:ubuntu /tmp
 # Adjust products.service file with VAULT_TOKEN
 cp /lib/systemd/system/product.service /lib/systemd/system/product.service.backup
 echo "Environment=VAULT_TOKEN=$(consul kv get config/product/catalog_token)" >> /lib/systemd/system/product.service
-systemctl daemon-reload
 
 # Start the service
+systemctl daemon-reload
 systemctl enable product.service
 systemctl start product.service
 

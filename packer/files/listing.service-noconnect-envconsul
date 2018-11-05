@@ -7,6 +7,7 @@ After=network.target
 WantedBy=multi-user.target
 
 [Service]
+Environment=VAULT_ADDR=http://active.vault.service.consul:8200
 Environment=LISTING_PORT=8000
 Environment=LISTING_ADDR=0.0.0.0
 Environment=DB_URL=mongodb.service.consul

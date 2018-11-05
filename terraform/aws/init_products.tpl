@@ -8,8 +8,12 @@ systemctl stop product.service
 cd /opt
 git clone https://github.com/kawsark/product-service.git
 chown -R ubuntu:ubuntu /opt/product-service
+chmod a+x /opt/product-service/product_wrapper.sh
 touch /tmp/product-service.pid
 chown -R ubuntu:ubuntu /tmp
+
+# Delay to ensure Consul agent is available
+sleep 30
 
 # Adjust products.service file with VAULT_TOKEN
 cp /lib/systemd/system/product.service /lib/systemd/system/product.service.backup

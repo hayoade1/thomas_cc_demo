@@ -80,7 +80,7 @@ aws_client_webclient_noconnect: aws_consul_client .built.aws_client_webclient_no
 	DC_NAME=east packer build -only amazon-ebs client_listing_noconnect.json
 	touch .built.aws_client_listing_noconnect
 
-.built.aws_client_listing_noconnect_envconsul: client_listing_noconnect_envconsul.json files/install_node.sh services/listing-noconnect.hcl files/listing.service-noconnect
+.built.aws_client_listing_noconnect_envconsul: client_listing_noconnect_envconsul.json files/install_node.sh services/listing-noconnect.hcl files/listing.service-noconnect-envconsul files/install_client_tools.sh
 	DC_NAME=east packer build -only amazon-ebs client_listing_noconnect_envconsul.json
 	touch .built.aws_client_listing_noconnect_envconsul
 
@@ -104,7 +104,7 @@ aws_client_webclient_noconnect: aws_consul_client .built.aws_client_webclient_no
 	DC_NAME=east packer build -only amazon-ebs client_product_noconnect.json
 	touch .built.aws_client_product_noconnect
 
-.built.aws_client_product_noconnect_envconsul: client_product_noconnect_envconsul.json services/product-noconnect.hcl files/product.service-noconnect files/install_products.sh files/install_env_consul_template.sh
+.built.aws_client_product_noconnect_envconsul: client_product_noconnect_envconsul.json services/product-noconnect.hcl files/product.service-noconnect-envconsul files/install_products.sh files/install_client_tools.sh
 	DC_NAME=east packer build -only amazon-ebs client_product_noconnect_envconsul.json
 	touch .built.aws_client_product_noconnect_envconsul
 

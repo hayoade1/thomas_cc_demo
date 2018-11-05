@@ -62,7 +62,7 @@ path "mongo/creds/catalog" {
 EOF
 
 vault policy write catalog /tmp/catalog.policy
-vault token create -policy=catalog -format=json | tee >(jq -r .auth.client_token > /tmp/catalog_token)
+vault token create -ttl=5m -policy=catalog -format=json | tee >(jq -r .auth.client_token > /tmp/catalog_token)
 consul kv put config/product/catalog_token $(cat /tmp/catalog_token)
 consul kv put config/listing/catalog_token $(cat /tmp/catalog_token)
 
@@ -70,7 +70,7 @@ vault write mongo/roles/catalog \
     db_name=ec2-dev-mongo \
     creation_statements='{ "db": "admin", "roles": [{ "role": "readWrite" }, {"role": "read", "db": "bbthe90s"}] }' \
     default_ttl="2m" \
-    max_ttl="5m"
+    max_ttl="4m"
 
 ## Test mongo using new credentials:
 export VAULT_ADDR=http://active.vault.service.consul:8200

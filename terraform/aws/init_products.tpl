@@ -15,9 +15,10 @@ chown -R ubuntu:ubuntu /tmp
 # Delay to ensure Consul agent is available
 sleep 30
 
-# Adjust products.service file with VAULT_TOKEN
+# Adjust products.service file with VAULT_TOKEN and ExecStart
 cp /lib/systemd/system/product.service /lib/systemd/system/product.service.backup
 echo "Environment=VAULT_TOKEN=$(consul kv get config/product/catalog_token)" >> /lib/systemd/system/product.service
+echo "ExecStart=/usr/local/bin/envconsul -config /opt/product-service/product_envconsul.hcl" >> /lib/systemd/system/product.service
 
 # Start the service
 systemctl daemon-reload

@@ -19,8 +19,16 @@ chown -R ubuntu:ubuntu /tmp
 sleep 30
 
 # Adjust listing.service file with VAULT_TOKEN
+
+# Perform AWS Auth:
+export nonce=$(date +%s%N | md5sum | awk '{print $1}')
+export VAULT_ADDR=http://active.vault.service.consul:8200
+vault write auth/aws/login role=dev-role pkcs7="$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/pkcs7)" nonce=$nonce -format=json > /tmp/vault-aws.txt
+cat /tmp/vault-aws.txt | jq -r .auth.client_token > /tmp/catalog_token
+
+# Update systemd file
 cp /lib/systemd/system/listing.service /lib/systemd/system/listing.service.backup
-echo "Environment=VAULT_TOKEN=$(consul kv get config/listing/catalog_token)" >> /lib/systemd/system/listing.service
+echo "Environment=VAULT_TOKEN=$(cat /tmp/catalog_token)" >> /lib/systemd/system/listing.service
 
 # Start the service
 systemctl daemon-reload

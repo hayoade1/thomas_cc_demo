@@ -60,11 +60,6 @@ path "mongo/creds/catalog" {
 EOF
 vault policy write catalog /tmp/catalog.policy
 
-# Create Token Authentication:
-vault token create -ttl=5m -policy=catalog -format=json | tee >(jq -r .auth.client_token > /tmp/catalog_token)
-consul kv put config/product/catalog_token $(cat /tmp/catalog_token)
-consul kv put config/listing/catalog_token $(cat /tmp/catalog_token)
-
 # Create AWS Authentication:
 export amis=ami-0f3f3743e0ea68efd,ami-066b4cb671dd4c246,ami-01560e899ed22fc6c
 vault auth enable aws

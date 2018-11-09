@@ -1,8 +1,8 @@
 # Deploy a Vault Server
 
-#
+# Ingress CIDR for Vault and Consul
 variable "security_group_ingress" {
-  description = "Ingress CIDR to allow SSH and Hashistack access. Warning: setting 0.0.0.0/0 is a bad idea as this deployment does not use TLS."
+  description = "Ingress CIDR to allow Vault and Consul access. Warning: setting 0.0.0.0/0 is a bad idea as this deployment does not use TLS."
   type = "list"
   default = ["1.1.1.1/32"]
 }
@@ -44,7 +44,7 @@ resource aws_security_group "vault_server_sg" {
     tags        = "${var.hashi_tags}"
 }
 
-resource "aws_security_group_rule" "ingress_allow_consul_vault" {
+resource "aws_security_group_rule" "vault_server_ingress_allow_consul_vault" {
   type              = "ingress"
   from_port         = 8200
   to_port           = 8600

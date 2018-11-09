@@ -66,7 +66,7 @@ consul kv put config/product/catalog_token $(cat /tmp/catalog_token)
 consul kv put config/listing/catalog_token $(cat /tmp/catalog_token)
 
 # Create AWS Authentication:
-export amis=ami-0357a7b8ad124d4e9,ami-066b4cb671dd4c246,ami-01560e899ed22fc6c
+export amis=ami-0f3f3743e0ea68efd,ami-066b4cb671dd4c246,ami-01560e899ed22fc6c
 vault auth enable aws
 vault write auth/aws/role/dev-role auth_type=ec2 bound_account_id=753646501470 bound_ami_id=$amis policies=catalog max_ttl=500h
 

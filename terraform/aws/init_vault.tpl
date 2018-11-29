@@ -61,9 +61,9 @@ EOF
 vault policy write catalog /tmp/catalog.policy
 
 # Create AWS Authentication:
-export amis=ami-0f3f3743e0ea68efd,ami-066b4cb671dd4c246,ami-01560e899ed22fc6c
+export amis=${product_ami},${listing_ami},${mongo_ami} # Restrict via Account AMI IDs
 vault auth enable aws
-vault write auth/aws/role/dev-role auth_type=ec2 bound_account_id=753646501470 bound_ami_id=$amis policies=catalog max_ttl=500h
+vault write auth/aws/role/dev-role auth_type=ec2 bound_account_id=${account_id} bound_ami_id=$amis policies=catalog max_ttl=500h
 
 # Adjust permissions
 chown -R ubuntu /tmp

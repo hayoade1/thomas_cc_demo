@@ -48,13 +48,13 @@ data "aws_ami" "product-api-noconnect" {
     }
 }
 
-data "aws_ami" "product-api-noconnect-envconsul" {
+data "aws_ami" "product-api-noconnect-consul-template" {
     most_recent = true
     owners      = ["753646501470"] # hc-sc-demos-2018
 
     filter {
         name   = "name"
-        values = ["east-aws-ubuntu-product-envconsul-noconnect-*"]
+        values = ["east-aws-ubuntu-product-consul-template-noconnect-*"]
     }
 }
 

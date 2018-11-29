@@ -38,7 +38,7 @@
         },
         "instance_type": "t2.micro",
         "ssh_username": "ubuntu",
-        "ami_name": "{{ user `dc_name` }}-aws-ubuntu-product-envconsul-noconnect-{{timestamp}}",
+        "ami_name": "{{ user `dc_name` }}-aws-ubuntu-product-consul-template-noconnect-{{timestamp}}",
         "tags": {
             "Name": "CC Demo Ubuntu Product Server - Without Consul Connect + Envconsul and Consul-Template",
             "owner": "kawsar@hashicorp.com",
@@ -68,7 +68,7 @@
       },
       {
 	"type": "file",
-	"source": "files/product.service-noconnect-envconsul",
+	"source": "files/product.service-noconnect-consul-template",
 	"destination": "/tmp/product.service"
       },
       {

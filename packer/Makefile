@@ -12,7 +12,7 @@ aws: aws_vault_server aws_consul_server aws_without_connect aws_with_connect
 aws_vault_server: aws_consul_client .built.aws_vault_server
 
 .PHONY: aws_without_connect
-aws_without_connect: aws_client_mongodb_noconnect aws_client_product_noconnect aws_client_product_noconnect_envconsul aws_client_webclient_noconnect aws_client_listing_noconnect aws_client_listing_noconnect_envconsul
+aws_without_connect: aws_client_mongodb_noconnect aws_client_product_noconnect aws_client_product_noconnect_consul-template aws_client_webclient_noconnect aws_client_listing_noconnect aws_client_listing_noconnect_envconsul
 
 .PHONY: aws_with_connect
 aws_with_connect: aws_client_mongodb_connect aws_client_product_connect aws_client_webclient_connect aws_client_listing_connect
@@ -47,8 +47,8 @@ aws_client_product_connect: aws_consul_client aws_client_product_noconnect .buil
 .PHONY: aws_client_product_noconnect
 aws_client_product_noconnect: aws_consul_client .built.aws_client_product_noconnect
 
-.PHONY: aws_client_product_noconnect_envconsul
-aws_client_product_noconnect_envconsul: aws_consul_client .built.aws_client_product_noconnect_envconsul
+.PHONY: aws_client_product_noconnect_consul-template
+aws_client_product_noconnect_consul-template: aws_consul_client .built.aws_client_product_noconnect_consul-template
 
 .PHONY: aws_client_webclient_connect
 aws_client_webclient_connect: aws_consul_client aws_client_webclient_noconnect .built.aws_client_webclient_connect
@@ -104,9 +104,9 @@ aws_client_webclient_noconnect: aws_consul_client .built.aws_client_webclient_no
 	DC_NAME=east packer build -only amazon-ebs client_product_noconnect.json
 	touch .built.aws_client_product_noconnect
 
-.built.aws_client_product_noconnect_envconsul: client_product_noconnect_envconsul.json services/product-noconnect.hcl files/product.service-noconnect-envconsul files/install_products.sh files/install_client_tools.sh
-	DC_NAME=east packer build -only amazon-ebs client_product_noconnect_envconsul.json
-	touch .built.aws_client_product_noconnect_envconsul
+.built.aws_client_product_noconnect_consul-template: client_product_noconnect_consul-template.json services/product-noconnect.hcl files/product.service-noconnect-consul-template files/install_products.sh files/install_client_tools.sh
+	DC_NAME=east packer build -only amazon-ebs client_product_noconnect_consul-template.json
+	touch .built.aws_client_product_noconnect_consul-template
 
 .built.aws_client_webclient_connect: client_webclient_connect.json services/web_client-connect.hcl files/web_client.service-connect
 	DC_NAME=east packer build -only amazon-ebs client_webclient_connect.json

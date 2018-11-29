@@ -3,14 +3,14 @@
 # Render userdata
 # Note: the mongo_server_ip is provided only to create a dependency
 data "template_file" "product_startup_script" {
-  template = "${file("${path.module}/init_products_hvac.tpl")}"
+  template = "${file("${path.module}/init_products.tpl")}"
   vars {
     mongo_server_ip = "${aws_instance.mongo.0.private_ip}"
   }
 }
 
 resource aws_instance "product-api" {
-    ami                         = "${var.mode == "connect" ? data.aws_ami.product-api-connect.id : data.aws_ami.product-api-noconnect-envconsul.id}"
+    ami   	      		= "${var.mode == "connect" ? data.aws_ami.product-api-connect.id : data.aws_ami.product-api-noconnect-consul-template.id}"
     count			= "${var.client_product_count}"
     instance_type		= "${var.client_machine_type}"
     key_name			= "${var.ssh_key_name}"

@@ -15,6 +15,10 @@ data "template_file" "vault_startup_script" {
   vars {
     consul_server_ip0 = "${aws_instance.consul.0.private_ip}"
     vault_path = "vault-${random_pet.prefix.id}"
+    product_ami = "${data.aws_ami.product-api-noconnect-consul-template.id}"
+    listing_ami = "${data.aws_ami.listing-api-noconnect-envconsul.id}"
+    mongo_ami = "${data.aws_ami.mongo-noconnect.id}"
+    account_id = "753646501470" # hc-sc-demos-2018
   }
 }
 

@@ -18,6 +18,15 @@ chown -R ubuntu:ubuntu /tmp
 # Delay to ensure Consul agent is available
 sleep 30
 
+# Add Listing App specific configuration:
+consul kv put listing/config/version 1.0
+consul kv put listing/config/DB_URL mongodb.service.consul
+consul kv put listing/config/DB_PORT 27017
+consul kv put listing/config/DB_NAME bbthe90s
+consul kv put listing/config/DB_COLLECTION listings
+consul kv put listing/config/LISTING_PORT 8000
+consul kv put listing/config/LISTING_ADDR 0.0.0.0
+
 # Adjust listing.service file with VAULT_TOKEN
 
 # Perform AWS Auth:

@@ -3,10 +3,9 @@
 - The packer configuration used to build the machine images is in the `packer` directory. All images except the one built with Vault Enterprise are currently public.
 - Use `make aws` if you want to build the AWS AMIs; if building your own packer images, please edit the AWS Account # appropriately.
 
-## Background
+## Architecture overview
 
-This terraform code will spin up a simple three-tier web application _without_ Consul Connect.
-It's designed to show how an organization already can use Consul for service discovery, EnvConsul for service configuration, and use Vault for Dynamic Database credentials.
+This terraform code will spin up a simple three-tier web application _without_ Consul Connect. Please view the main [README](../../README.md) for an Architecture overview.
 
 For reference, the three tiers are:
 
@@ -17,7 +16,7 @@ For reference, the three tiers are:
  A Vault instance is also instantiated to provide Dynamic credentials for MongoDB.
 
 Services find each other using the [Service Discovery](https://www.consul.io/discovery.html) mechanism in Consul.
-- [Architecture diagram for Non-connect version](../../diagrams/Consul-demo-No-connect.png).
+.
 
 The code which built all of the images is in the `packer` directory located at the top level of this repo. While you shouldn't have to build the images which are used in this demo, the Packer code is there to enable you to do so, and also to allow you to see how the application configuration changes as you move your infrastructure to Consul Connect.
 
@@ -41,11 +40,11 @@ You will need:
     ```
     Replace `<your access key ID>` with your AWS Access Key ID and `<your secret key>` with your AWS Secret Access Key (see [Access Keys (Access Key ID and Secret Access Key)](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys) for more help). *NOTE*: Currently, the Packer-built AMIs are only in `us-east-1`.
 
- 2. Please run: `git clone https://github.com/thomashashi/thomas_cc_demo.git no-connect` --- this checks out the code in a directory we will use for the _non-Connect_ version of the demo
+ 2. Please run: `git clone https://github.com/kawsark/thomas_cc_demo.git`
 
 ## Deployment
 
- 1. `cd no-connect/terraform/aws/`
+ 1. `cd thomas_cc_demo/terraform/aws/`
  2. `cp terraform.auto.tfvars.example terraform.auto.tfvars`
  3. Edit the `terraform.auto.tfvars` file:
     1. Change the `project_name` to something which is 1) only all lowercase letters, numbers and dashes; 2) is unique to you; 3) and ends in `-noconnect`
@@ -74,7 +73,7 @@ This will take a couple minutes to run. Once the command prompt returns, wait a 
  1. `terraform output webclient-lb`
  2. Point a web browser at the value returned
 
-### Connect to the web frontend
+### Service Discovery
 
  1. `terraform output webclient_servers`
  2. `ssh ubuntu@<first ip returned>`
@@ -83,11 +82,15 @@ This will take a couple minutes to run. Once the command prompt returns, wait a 
     1. The line `Environment=LISTING_URI=http://listing.service.consul:8000` tells `web_client` how to talk to the `listing` service
     2. The line `Environment=PRODUCT_URI=http://product.service.consul:5000` tells `web_client` how to talk to the `product` service
     3. Note how both are using Consul for service discovery
- 4. `sudo tcpdump -A 'host listing.service.consul and port 8000 and (((ip[2:2] - ((ip[0]&0xf)<<2)) - ((tcp[12]&0xf0)>>2)) != 0)'`
-    - This `tcpdump` command simply prints the packet data without any of the headers. The point is to demonstrate how the packet
-      data is in plaintext
+
  5. Switch to the web browser and reload the page a few times
  6. Return to the terminal and look at the data going back and forth across the network. See how it's in plaintext.
  7. Hit _Cntl-C_ to exit tcpdump
  8. Re-iterate that while services are finding each other dynamically, nothing is protecting their traffic
  9. `cat /etc/consul/web_client.hcl` --- show a routine Consul service definition file, there's some health checks, but very routine
+
+ ### Service Configuration
+Pending
+
+ ### Dynamic Credentials
+Pending

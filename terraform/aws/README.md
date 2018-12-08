@@ -8,7 +8,6 @@ This terraform code will spin up a simple three-tier web application _without_ C
 - [Pre-requisites](README.md#pre-requisites)
 - [Build AMIs using Packer (Optional)](README.md#build-amis-using-packer-optional-)
 - [Provisioning](README.md#provisioning)
-- [Show the web frontend](README.md#show-the-web-frontend)
 - [Service Discovery](README.md#service-discovery)
 - [Service Configuration](README.md#service-configuration)
 - [Secrets Management](README.md#dynamic-credentials)
@@ -25,6 +24,8 @@ This terraform code will spin up a simple three-tier web application _without_ C
 - Use `make aws` if you want to build the AWS AMIs; if building your own packer images, please edit the AWS Account # appropriately.
 
 ### Provisioning
+
+#### Terraform steps
  1. Open a terminal window and please run the commands:
 ```
 export AWS_ACCESS_KEY_ID="<your access key ID>"
@@ -42,6 +43,7 @@ export AWS_DEFAULT_REGION="us-east-1"
   3. Change `ssh_key_name` to the name of the key identified in "Requirement 4"
 
     The combination of `project_name` and `owner` **must be unique within your AWS organization** --- they are used to set the Consul cluster membership when those instances start up.
+  4. Optionally, specify your own IP address (`["<your_ip_address>/32"]`)  for the variable `security_group_ingress`. This is only needed if you want to access Vault and/or Consul UI. You can visit [http://whatismyip.akamai.com](http://whatismyip.akamai.com) to find your IP address.
 
 4. Save your changes to the `terraform.auto.tfvars` file
 5. Run `terraform init`, when you see: "Terraform has been successfully initialized!":
@@ -49,7 +51,7 @@ export AWS_DEFAULT_REGION="us-east-1"
 
 This will take a couple minutes to run. Once the command prompt returns, wait a couple minutes and the demo will be ready.
 
-### Show the web frontend
+#### Access the application
 
  1. `terraform output webclient-lb`
  2. Point a web browser at the value returned

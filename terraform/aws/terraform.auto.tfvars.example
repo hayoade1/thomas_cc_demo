@@ -18,5 +18,5 @@ ssh_key_name    = "thomas-yubikey"
 
 # (Optional) Add your IP external address here so you can access the Vault and Consul UI:
 # 1.1.1.1 is just an example IP (Happens to be Cloudflare DNS)
-# You can use the command http://whatismyip.akamai.com to find it
+# You can use the command `curl -s http://whatismyip.akamai.com` to find it
 # security_group_ingress = ["1.1.1.1/32"]

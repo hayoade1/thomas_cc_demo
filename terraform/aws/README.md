@@ -1,70 +1,55 @@
 # Running the Demo
 
-- The packer configuration used to build the machine images is in the `packer` directory. All images except the one built with Vault Enterprise are currently public.
+## Overview
+
+This terraform code will spin up a simple three-tier web application _without_ Consul Connect. In summary, the three tiers are: a web frontend `web_client`, 2 APIs: `listing` and `product`, and a MongoDB instance. Please view the main [README](../../README.md) for an Architecture overview.
+
+### Steps
+- [Pre-requisites](README.md#pre-requisites)
+- [Build AMIs using Packer (Optional)](README.md#build-amis-using-packer-optional-)
+- [Provisioning](README.md#provisioning)
+- [Show the web frontend](README.md#show-the-web-frontend)
+- [Service Discovery](README.md#service-discovery)
+- [Service Configuration](README.md#service-configuration)
+  - [Service Configuration - Product service](README.md#service-configuration-for-product-service)
+  - [Service Configuration - Listing service](README.md#service-configuration-for-listing-service)
+- [Secrets Management](README.md#dynamic-credentials)
+  - [Dynamic credentials - Product service](README.md#dynamic-credentials-for-product-service)
+  - [Dynamic credentials - Listing service](README.md#dynamic-credentials-for-listing-service)
+
+### Pre-requisites
+
+1. A machine with git and ssh installed
+2. The appropriate [Terraform binary](https://www.terraform.io/downloads.html) for your system
+3. An AWS account with credentials which allow you to deploy infrastructure
+4. An already-existing [Amazon EC2 Key Pair](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html). *NOTE*: if the EC2 Key Pair you specify is not your default ssh key, you will need to use `ssh -i /path/to/private_key` instead of `ssh` in the commands below
+
+### Build AMIs using Packer (optional)
+- The packer configuration used to build the machine images is in the `packer` directory. All images except the one built with Vault Enterprise are currently public and reside in AWS `us-east-1` region.
 - Use `make aws` if you want to build the AWS AMIs; if building your own packer images, please edit the AWS Account # appropriately.
 
-## Architecture overview
-
-This terraform code will spin up a simple three-tier web application _without_ Consul Connect. Please view the main [README](../../README.md) for an Architecture overview.
-
-For reference, the three tiers are:
-
- 1. A web frontend `web_client`, written in Python, which calls...
- 2. Two internal apis (a `listing` service written in Node, and a `product` service written in Python), both of which store data in ...
- 3. A MongoDB instance
-
- A Vault instance is also instantiated to provide Dynamic credentials for MongoDB.
-
-Services find each other using the [Service Discovery](https://www.consul.io/discovery.html) mechanism in Consul.
-.
-
-The code which built all of the images is in the `packer` directory located at the top level of this repo. While you shouldn't have to build the images which are used in this demo, the Packer code is there to enable you to do so, and also to allow you to see how the application configuration changes as you move your infrastructure to Consul Connect.
-
-## Requirements
-
-You will need:
- 1. A machine with git and ssh installed
- 2. The appropriate [Terraform binary](https://www.terraform.io/downloads.html) for your system
- 3. An AWS account with credentials which allow you to deploy infrastructure
- 4. An already-existing [Amazon EC2 Key Pair](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html)
-    - *NOTE*: if the EC2 Key Pair you specify is not your default ssh key, you will need to use `ssh -i /path/to/private_key` instead
-      of `ssh` in the commands below
-
-### Terminal Setup
-
+### Provisioning
  1. Open a terminal window and please run the commands:
-    ```
-    export AWS_ACCESS_KEY_ID="<your access key ID>"
-    export AWS_SECRET_ACCESS_KEY="<your secret key>"
-    export AWS_DEFAULT_REGION="us-east-1"
-    ```
+```
+export AWS_ACCESS_KEY_ID="<your access key ID>"
+export AWS_SECRET_ACCESS_KEY="<your secret key>"
+export AWS_DEFAULT_REGION="us-east-1"
+```
     Replace `<your access key ID>` with your AWS Access Key ID and `<your secret key>` with your AWS Secret Access Key (see [Access Keys (Access Key ID and Secret Access Key)](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys) for more help). *NOTE*: Currently, the Packer-built AMIs are only in `us-east-1`.
 
- 2. Please run: `git clone https://github.com/kawsark/thomas_cc_demo.git`
+2. Please run: `git clone https://github.com/kawsark/thomas_cc_demo.git`
+3. `cd thomas_cc_demo/terraform/aws/`
+4. `cp terraform.auto.tfvars.example terraform.auto.tfvars`
+5. Edit the `terraform.auto.tfvars` file:
+  1. Change the `project_name` to something which is 1) only all lowercase letters, numbers and dashes; 2) is unique to you; 3) and ends in `-noconnect`
+  2. In the `hashi_tags` line change `owner` to be your email address.
+  3. Change `ssh_key_name` to the name of the key identified in "Requirement 4"
 
-## Deployment
+    The combination of `project_name` and `owner` **must be unique within your AWS organization** --- they are used to set the Consul cluster membership when those instances start up.
 
- 1. `cd thomas_cc_demo/terraform/aws/`
- 2. `cp terraform.auto.tfvars.example terraform.auto.tfvars`
- 3. Edit the `terraform.auto.tfvars` file:
-    1. Change the `project_name` to something which is 1) only all lowercase letters, numbers and dashes; 2) is unique to you; 3) and ends in `-noconnect`
-    2. In the `hashi_tags` line change `owner` to be your email address.
-    3. Change `ssh_key_name` to the name of the key identified in "Requirement 4"
-
-    The combination of `project_name` and `owner` **must be unique within your AWS organization** --- they are used to set the Consul cluster membership when those instances start up
- 4. Save your changes to the `terraform.auto.tfvars` file
- 5. `terraform init`
- 6. When you see "Terraform has been successfully initialized!" ...
- 7. Run `terraform plan -out tf.plan`
- 8. When you see
-    ```
-    This plan was saved to: tf.plan
-
-    To perform exactly these actions, run the following command to apply:
-        terraform apply "tf.plan"
-    ```
-    ...
- 9. Run `terraform apply tf.plan`
+4. Save your changes to the `terraform.auto.tfvars` file
+5. Run `terraform init`, when you see: "Terraform has been successfully initialized!":
+6. Run `terraform plan`, if everything looks good, run `terraform apply`. Reply `yes` to Terraform confirmation prompt.
 
 This will take a couple minutes to run. Once the command prompt returns, wait a couple minutes and the demo will be ready.
 
@@ -81,16 +66,119 @@ This will take a couple minutes to run. Once the command prompt returns, wait a 
  3. `cat /lib/systemd/system/web_client.service`
     1. The line `Environment=LISTING_URI=http://listing.service.consul:8000` tells `web_client` how to talk to the `listing` service
     2. The line `Environment=PRODUCT_URI=http://product.service.consul:5000` tells `web_client` how to talk to the `product` service
-    3. Note how both are using Consul for service discovery
+    3. Note how both are using Consul for service discovery, the services are finding each other dynamically.
 
- 5. Switch to the web browser and reload the page a few times
- 6. Return to the terminal and look at the data going back and forth across the network. See how it's in plaintext.
- 7. Hit _Cntl-C_ to exit tcpdump
- 8. Re-iterate that while services are finding each other dynamically, nothing is protecting their traffic
- 9. `cat /etc/consul/web_client.hcl` --- show a routine Consul service definition file, there's some health checks, but very routine
+ 4. `cat /etc/consul/web_client.hcl` --- show a routine Consul service definition file, there's some health checks, but very routine
 
- ### Service Configuration
-Pending
+### Service Configuration
 
- ### Dynamic Credentials
-Pending
+1. On the web browser "Product metadata" and "Listing metadata" sections, note the version string for both Product and Listing service. It should say `'version': 1.0`.
+2. Switch to the terminal where you had a SSH session established with the web_client. View the version strings stored in Consul distributed KV store:
+```
+consul kv get product/config/version
+consul kv get listing/config/version
+```
+Try adding `-detailed` to see additional kv metadata: `consul kv get -detailed product/config/version`
+
+3. Consul UI (optional): If you have setup the Terraform variable `security_group_ingress` in your terraform.auto.tfvars, you can view these in the Consul UI. To construct the URL for Consul UI you can issue the command `terraform output consul_servers` and use any DNS name with port 8500: `"http://<consul_server>:8500/ui"`
+
+#### Service Configuration for Product service
+  - On your terminal, exit out of the web_client SSH session and issue: `terraform output product_api_servers`
+  - `ssh ubuntu@<first ip returned>`
+  - View product service configuration using the `-recurse` option to view all key / value pairs:
+  ```
+  consul kv get -recurse product/config
+  ```
+  - Consul-template reads these values and renders an application configuration file: `/opt/product-service/config.yml`. Display the contents of this file: `cat /opt/product-service/config.yml`.
+
+  - Lets modify the version string: `consul kv put product/config/version 1.5`. Consul-template will restart the product service with the values. You can see the update take effect immediately:
+  ```
+  cat /opt/product-service/config.yml
+  curl -s product.service.consul:5000/product/metadata
+  ```
+  - The configuration for consul-template can be seen here: `cat /opt/product-service/product_consul_template.hcl`.
+  - The following line tells consul-template where to find the input template:
+  ```
+  source = "/opt/product-service/config.ctpl"
+  ```
+  - If you display the above file it will show where consul-template pulls the configuration from: `cat /opt/product-service/config.ctpl`
+
+#### Service Configuration for Listing service
+  - On your terminal, exit out of the Listing SSH session and issue: `terraform output listing_api_servers`
+  - `ssh ubuntu@<first ip returned>`
+  - View product service configuration using the `-recurse` option to view all key / value pairs:
+  ```
+  consul kv get -recurse listing/config
+  ```
+  - Envconsul reads these values and launches the application as a subprocess with these Environment variables.
+  - Lets modify the version string: `consul kv put listing/config/version 1.5`. Envconsul will restart the listing service with updated values.
+  - You can see the update take effect using this command: `curl listing.service.consul:8000/metadata`
+  - The configuration for Envconsul can be seen here: `cat /opt/listing-service/listing_envconsul.hcl`.
+
+3. Switch to the web browser and refresh, the version strings should both say `'version': 1.5` now.
+  - Note: Envconsul and Consul-template are not required for distributed service configuration. While using these tools help with application integration, services can use Consul's REST API to read application configuration information.
+
+### Dynamic Credentials
+
+This demo uses Vault's [AWS EC2 Authentication method](https://www.vaultproject.io/docs/auth/aws.html#ec2-auth-method) with the [Mongo DB Database Secrets Engine](https://www.vaultproject.io/docs/secrets/databases/mongodb.html#mongodb-database-secrets-engine).
+- On your terminal, exit out of the Listing SSH session and issue: `terraform output vault_servers`
+- `ssh ubuntu@<first ip returned>`
+- For this demo, the Vault toot token is placed in the /tmp directory with a [random_pet]() filename that ends in `_root_token`.
+Let use this root token to setup Vault CLI access:
+```
+export VAULT_ADDR="http://vault.service.consul:8200"
+export VAULT_TOKEN=$(cat /tmp/*_root_token)
+vault token lookup
+```
+You should see `path auth/token/root`
+
+  - Note: storing the root token in `/tmp` is only done for demo purposes, the root token should be secured per [Vault Production hardening steps](https://learn.hashicorp.com/vault/operations/production-hardening).
+
+- Display Vault's Authentication methods, the AWS authentication method is mounted under default `aws` path:
+```
+vault auth list
+```
+- Display Vault's Secret engines, Mongo DB Database Secret Engine is mounted under default `mongo` path:
+```
+vault secrets list
+```
+- Vault UI (Optional: If you have setup the Terraform variable `security_group_ingress` in your terraform.auto.tfvars, you can view these in the Vault UI. To construct the URL for Vault UI you can issue the command: `echo "http://$(terraform output vault_servers):8200/ui"`. Use the root token from above to authenticate into the UI.
+
+Now lets review how each service renews credentials:
+
+#### Dynamic Credentials for Listing service
+- The listing service uses the Environment Variable `DB_PW` to read Mongo DB credentials. Envconsul interacts with Vault using a token that was supplied during bootstrap process.
+  - _(Optional) View the [init\_listing.tpl](init\_listing.tpl) see this process._
+
+- Envconsul obtains a Vault token, then reads the MongoDB credential from the path: `mongo/creds/catalog`.
+- Lets read these credentials by issuing: `vault read mongo/creds/catalog`
+- Note that the TTL is only 2 mins.
+- Lets go ahead and revoke all leases for mongo:
+```
+curl \
+--header "X-Vault-Token: ${VAULT_TOKEN}" \
+--request PUT \
+${VAULT_ADDR}/v1/sys/leases/revoke-force/mongo/creds
+```
+Now refresh the web browser and the Listing service should stop working. Envconsul will restart this application upon next lease expiry time which is under 120s. At that time it will obtain new credentials and resume working.
+
+**But why is Product service still working??**
+
+#### Dynamic Credentials for Product service
+- SSH into the product service and issue: `terraform output product_api_servers`
+- `ssh ubuntu@<first ip returned>`
+- The product service uses [Vault hvac Python SDK](https://github.com/hvac/hvac) to authenticate with the Vault server. It obtains a Vault token, then reads the MongoDB credential from the path: `mongo/creds/catalog`.
+- You can view the code to do this: `cat /opt/product-service/vaultawsec2.py`. The relevant authentication flow is: `get_mongo_creds() --> get_vault_client --> auth_ec2`.
+- View the main code for product service: `cat /opt/product-service/product.py` and inspect the function `get_products_from_db()`. You will notice a retry logic built-in where if authentication fails (e.g. expired credentials), it will try to obtain a new credential:
+```
+except Exception as e:
+       tprint(str(e))
+       tprint("Renewing credentials and retrying once -->")
+...
+       db_client = connect_to_db()
+```
+- Now search for this string in the syslog: `grep "Renewing credentials and retrying once" /var/log/syslog` and you will see many instances of this retry. By invokling `/sys/leases/revoke-force/mongo/creds`, and every least TTL duration (120 seconds), Vault revokes Mongo credentials and upon the next health check the application obtains a new Mongo credential.
+
+- For demo purposes the product service logs credentials as a debug log, this is not recommended for production application. You can view these by searching for it in the syslog: `grep "Vault response from AWS EC2 Auth" /var/log/syslog`
+
+We have now seen 2 patterns to for applications to consume Vault secrets: using a tool such as Envconsul and direct application integration.

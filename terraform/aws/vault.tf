@@ -1,13 +1,5 @@
 # Deploy a Vault Server
 
-# Ingress CIDR for Vault and Consul
-variable "security_group_ingress" {
-  description = "Ingress CIDR to allow Vault and Consul access. Warning: setting 0.0.0.0/0 is a bad idea as this deployment does not use TLS."
-  type = "list"
-  default = ["1.1.1.1/32"]
-}
-
-
 # Render userdata
 resource "random_pet" "prefix" {}
 data "template_file" "vault_startup_script" {

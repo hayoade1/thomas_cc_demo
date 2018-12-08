@@ -19,6 +19,13 @@ variable "ssh_key_name" {
 
 # Optional
 
+# Ingress CIDR for Vault and Consul
+variable "security_group_ingress" {
+  description = "Ingress CIDR to allow Vault and Consul access. Setting 0.0.0.0/0 is a bad idea as this deployment does not use TLS."
+  type = "list"
+  default = ["1.1.1.1/32"]
+}
+
 # By default, we start in a "noconnect" mode --- this tells Terraform
 # to deploy the version of this demo that has Consul but does not use
 # Consul Connect. But when you switch to "connect" mode, this will

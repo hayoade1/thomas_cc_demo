@@ -16,13 +16,7 @@ aws_region      = "us-east-1"
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html
 ssh_key_name    = "thomas-yubikey"
 
-# By default, we start in a "noconnect" mode --- this tells Terraform
-# to deploy the version of this demo that has Consul but does not use
-# Consul Connect. But when you switch to "connect" mode, this will
-# cause Terraform to deploy the version which has Consul Connect enabled
-mode             = "noconnect"
-
 # (Optional) Add your IP external address here so you can access the Vault and Consul UI:
 # 1.1.1.1 is just an example IP (Happens to be Cloudflare DNS)
 # You can use the command http://whatismyip.akamai.com to find it
-security_group_ingress = ["1.1.1.1/32"]
+# security_group_ingress = ["1.1.1.1/32"]

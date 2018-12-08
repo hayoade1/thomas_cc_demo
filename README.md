@@ -7,7 +7,9 @@ Use-cases demonstrated:
 - Vault: Dynamic Credentials, AWS EC2 Authentication Method
 - Terraform: Infrastructure-as-code
 
-Time to complete: 30 minutes
+Time to complete: 20 - 60 minutes (depending on # of use-cases attempted)
+
+[Skip to Running the demo](terraform/aws/README.md)
 
 This is an incredibly modified version of [thomashashi/thomas_cc_demo](https://github.com/thomashashi/thomas_cc_demo). If you are looking for a Consul Connect demo, please refer to [thomashashi/thomas_cc_demo](https://github.com/thomashashi/thomas_cc_demo)
 

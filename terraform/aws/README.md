@@ -11,11 +11,7 @@ This terraform code will spin up a simple three-tier web application _without_ C
 - [Show the web frontend](README.md#show-the-web-frontend)
 - [Service Discovery](README.md#service-discovery)
 - [Service Configuration](README.md#service-configuration)
-  - [Service Configuration - Product service](README.md#service-configuration-for-product-service)
-  - [Service Configuration - Listing service](README.md#service-configuration-for-listing-service)
 - [Secrets Management](README.md#dynamic-credentials)
-  - [Dynamic credentials - Product service](README.md#dynamic-credentials-for-product-service)
-  - [Dynamic credentials - Listing service](README.md#dynamic-credentials-for-listing-service)
 
 ### Pre-requisites
 

@@ -39,7 +39,7 @@ then
 else
       echo "Consul is up, proceeding with Initialization"
 fi
-echo "VAULT_ADDR=\"http://localhost:8200\"" >> /home/ubuntu/.profile
+
 # Initialize and unseal:
 export VAULT_ADDR="http://localhost:8200"
 vault operator init -format=json -n 1 -t 1 > /tmp/${vault_path}.txt
@@ -48,8 +48,8 @@ cat /tmp/${vault_path}.txt | jq -r .root_token > /tmp/${vault_path}_root_token
 export VAULT_TOKEN=$(cat /tmp/${vault_path}_root_token)
 
 # Setup profile:
-echo "VAULT_ADDR=\"http://localhost:8200\"" >> /home/ubuntu/.profile
-echo "VAULT_TOKEN=$(cat /tmp/${vault_path}_root_token)" >> /home/ubuntu/.profile
+echo "export VAULT_ADDR=\"http://localhost:8200\"" >> /etc/profile.d/vault.sh
+echo "export VAULT_TOKEN=\"$(cat /tmp/${vault_path}_root_token)\"" >> /etc/profile.d/vault.sh
 
 sleep 10
 vault operator unseal $(cat /tmp/${vault_path}_unseal_key)

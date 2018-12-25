@@ -64,14 +64,14 @@ This will take a couple minutes to run. Once the command prompt returns, wait a 
 ### Service Discovery
 
  1. `terraform output webclient_servers`
- 2. `ssh ubuntu@<first_dns_returned>`
+ 2. `ssh -i <your_pem_file> ubuntu@<first_dns_returned>`
     1. When asked `Are you sure you want to continue connecting (yes/no)?` answer `yes` and hit enter
  3. `cat /lib/systemd/system/web_client.service`
     1. The line `Environment=LISTING_URI=http://listing.service.consul:8000` tells `web_client` how to talk to the `listing` service
     2. The line `Environment=PRODUCT_URI=http://product.service.consul:5000` tells `web_client` how to talk to the `product` service
     3. Note how both are using Consul for service discovery, the services are finding each other dynamically.
 
- 4. `cat /etc/consul/web_client.hcl` --- show a routine Consul service definition file, there's some health checks, but very routine
+ 4. `cat /etc/consul/web_client.hcl` shows the `web_client` Consul service definition file with some health checks.
 
 ### Service Configuration
 
@@ -87,7 +87,7 @@ Try adding `-detailed` to see additional kv metadata: `consul kv get -detailed p
 
 #### Service Configuration for Product service
   - On your terminal, exit out of the web_client SSH session and issue: `terraform output product_api_servers`
-  - `ssh ubuntu@<first_dns_returned>`
+  - `ssh -i <your_pem_file> ubuntu@<first_dns_returned>`
   - View product service configuration using the `-recurse` option to view all key / value pairs:
   ```
   consul kv get -recurse product/config
@@ -108,7 +108,7 @@ Try adding `-detailed` to see additional kv metadata: `consul kv get -detailed p
 
 #### Service Configuration for Listing service
   - On your terminal, exit out of the Listing SSH session and issue: `terraform output listing_api_servers`
-  - `ssh ubuntu@<first_dns_returned>`
+  - `ssh -i <your_pem_file> ubuntu@<first_dns_returned>`
   - View product service configuration using the `-recurse` option to view all key / value pairs:
   ```
   consul kv get -recurse listing/config
@@ -129,7 +129,7 @@ Note: Envconsul and Consul-template are not required for distributed service con
 
 This demo uses Vault's [AWS EC2 Authentication method](https://www.vaultproject.io/docs/auth/aws.html#ec2-auth-method) with the [Mongo DB Database Secrets Engine](https://www.vaultproject.io/docs/secrets/databases/mongodb.html#mongodb-database-secrets-engine).
 - On your terminal, exit out of the Listing SSH session and issue: `terraform output vault_servers`
-- `ssh ubuntu@<first_dns_returned>`
+- `ssh -i <your_pem_file> ubuntu@<first_dns_returned>`
 
 For this demo, the environment variables `VAULT_ADDR` and `VAULT_TOKEN` have setup already.
 - Issue the following commands to view Vault server status. We have a single server install for this demo.
@@ -155,7 +155,7 @@ vault secrets list
 Now lets review how each service renews credentials:
 
 #### Dynamic Credentials for Listing service
-- The listing service uses the Environment Variable `DB_PW` to read Mongo DB credentials. Envconsul interacts with Vault using a token that was supplied during bootstrap process.
+- The listing service uses the Environment Variable `password` to read Mongo DB credentials. Envconsul interacts with Vault using a token that was supplied during bootstrap process.
   - _(Optional) View the [init\_listing.tpl](init\_listing.tpl) see this process._
 
 - Envconsul obtains a Vault token, then reads the MongoDB credential from the path: `mongo/creds/catalog`.
@@ -179,7 +179,7 @@ Now refresh the web browser and the Listing service should stop working. Envcons
 
 #### Dynamic Credentials for Product service
 - SSH into the product service and issue: `terraform output product_api_servers`
-- `ssh ubuntu@<first_dns_returned>`
+- `ssh -i <your_pem_file> ubuntu@<first_dns_returned>`
 - The product service uses [Vault hvac Python SDK](https://github.com/hvac/hvac) to authenticate with the Vault server. It obtains a Vault token, then reads the MongoDB credential from the path: `mongo/creds/catalog`.
 - You can view the code to do this: `cat /opt/product-service/vaultawsec2.py`. The relevant authentication flow is: `get_mongo_creds() --> get_vault_client --> auth_ec2`.
 - View the main code for product service: `cat /opt/product-service/product.py` and inspect the function `get_products_from_db()`. You will notice a retry logic built-in where if authentication fails (e.g. expired credentials), it will try to obtain a new credential:
@@ -190,7 +190,7 @@ except Exception as e:
 ...
        db_client = connect_to_db()
 ```
-- Now search for this string in the syslog: `grep "Renewing credentials and retrying once" /var/log/syslog` and you will see many instances of this retry. By invokling `/sys/leases/revoke-force/mongo/creds`, and every least TTL duration (120 seconds), Vault revokes Mongo credentials and upon the next health check the application obtains a new Mongo credential.
+- Now search for this string in the syslog: `grep "Renewing credentials and retrying once" /var/log/syslog` and you will one or more instances of this retry. By invokling `/sys/leases/revoke-force/mongo/creds`, and every least TTL duration (120 seconds), Vault revokes Mongo credentials and upon the next health check the application obtains a new Mongo credential.
 
 - For demo purposes the product service logs credentials as a debug log, this is not recommended for production application. You can view these by searching for it in the syslog: `grep "Vault response from AWS EC2 Auth" /var/log/syslog`
 

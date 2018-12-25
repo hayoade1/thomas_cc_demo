@@ -1,3 +1,4 @@
+import logging.handlers
 from flask import Flask
 from flask import jsonify
 from pymongo import MongoClient
@@ -7,6 +8,8 @@ import yaml
 import os
 import datetime
 import traceback
+
+logger = logging.getLogger(__name__)
 
 mongo_creds = None
 product_config = None
@@ -73,12 +76,6 @@ def get_metadata():
 def get_health():
     return "OK"
 
-#prints a message with state and timestamp
-def tprint(msg):
-    now = datetime.datetime.now()
-    t = now.strftime("%y-%m-%d %H:%M:%S")
-    print("[%s] %s" % (str(t),msg))
-
 def get_products_from_db():
     global product_config
 
@@ -89,8 +86,8 @@ def get_products_from_db():
         return [rec for rec in db_client[db_name][col_name].find({}, {'_id': False})]
 
     except Exception as e:
-        tprint(str(e))
-        tprint("Renewing credentials and retrying once -->")
+        logger.warn(str(e))
+        logger.warn("Renewing credentials and retrying once -->")
         traceback.print_exc()
 
         global db_client
@@ -112,9 +109,9 @@ if __name__ == '__main__':
 
         else: # Try to load from current directory
             config_file_path = "config.yml"
-            tprint('Could not find config file in ${PRODUCT_CONFIG_PATH} or default path. Trying to load from current directory.')
+            logger.info('Could not find config file in ${PRODUCT_CONFIG_PATH} or default path. Trying to load from current directory.')
 
-        tprint("Loading config file from path: %s" % config_file_path)
+        logger.info("Loading config file from path: %s" % config_file_path)
         with open(config_file_path, 'r') as ymlfile:
             product_config = yaml.load(ymlfile)["product"]
             ymlfile.close()
@@ -126,4 +123,4 @@ if __name__ == '__main__':
         app.run(host=product_config['PRODUCT_ADDR'], port=product_config['PRODUCT_PORT'])
 
     except Exception as e:
-        tprint(str(e))
+        logger.error(str(e))

@@ -6,7 +6,7 @@
 # of this in a single AWS account, you'll need to make these
 # distinct to keep the instances separate.
 
-project_name    = "service-configuration-demo"
+project_name    = "kawsar-configuration-demo"
 hashi_tags      = { "TTL" = "48", owner = "kawsar@hashicorp.com", "project" = "Service Configuration demo" }
 
 # Packer images currently only exist in "us-east-1"

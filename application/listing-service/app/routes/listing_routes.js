@@ -33,8 +33,8 @@ module.exports = function(app, db, conf) {
   app.get('/metadata', (req, res) => {
     console.log("metadata")
 
-    var db_username = process.env.DB_USER
-    var db_pw = process.env.DB_PW
+    var db_username = process.env.username
+    var db_pw = process.env.password
     var version = process.env.version
 
     var pw_len = db_pw.length
@@ -46,7 +46,7 @@ module.exports = function(app, db, conf) {
     var masked_pw = m + db_pw.substring(pw_len-4, pw_len)
 
     metadata_dict = {
-     "version" : version, 
+     "version" : version,
      "DB_USER": db_username,
      "DB_PW": masked_pw
     }

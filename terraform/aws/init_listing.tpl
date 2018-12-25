@@ -4,9 +4,13 @@ cd /tmp
 # Stop listing service if up already
 systemctl stop listing.service
 
+# Download application
+cd /tmp
+git clone https://github.com/kawsark/thomas_cc_demo.git
+cp -r /tmp/thomas_cc_demo/application/listing-service /opt
+
 # Create application directory and create a PID file:
 cd /opt
-git clone https://github.com/kawsark/listing-service.git
 chmod a+x /opt/listing-service/listing_wrapper.sh
 cd listing-service
 npm install

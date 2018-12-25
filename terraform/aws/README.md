@@ -15,13 +15,16 @@ This terraform code will spin up a simple three-tier web application _without_ C
 ### Pre-requisites
 
 1. A machine with git and ssh installed
-2. The appropriate [Terraform binary](https://www.terraform.io/downloads.html) for your system
-3. An AWS account with credentials which allow you to deploy infrastructure
+2. The appropriate [Terraform binary](https://www.terraform.io/downloads.html) for your system. This demo was tested using terraform `v0.11.10`.
+3. An AWS account with credentials which allow you to deploy infrastructure.
 4. An already-existing [Amazon EC2 Key Pair](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html). *NOTE*: if the EC2 Key Pair you specify is not your default ssh key, you will need to use `ssh -i /path/to/private_key` instead of `ssh` in the commands below
 
 ### Build AMIs using Packer (optional)
-- The packer configuration used to build the machine images is in the `packer` directory. All images except the one built with Vault Enterprise are currently public and reside in AWS `us-east-1` region.
-- Use `make aws` if you want to build the AWS AMIs; if building your own packer images, please edit the AWS Account # appropriately.
+- The packer configuration used to build the machine images is in the `packer` directory. All images are currently public and reside in AWS `us-east-1` region.
+- If you want to build the AWS AMIs use the steps below:
+  - Edit the AWS Account # appropriately in `packer/*.json` file. More specifically, adjust the `"owners": ["<your-aws-account-#>"]` parameter to reflect your AWS account #.
+  - Change to the `packer` directory: `cd packer`.
+  - Then issue the command: `make aws`.
 
 ### Provisioning
 
@@ -38,11 +41,13 @@ export AWS_DEFAULT_REGION="us-east-1"
 3. `cd thomas_cc_demo/terraform/aws/`
 4. `cp terraform.auto.tfvars.example terraform.auto.tfvars`
 5. Edit the `terraform.auto.tfvars` file:
-  1. Change the `project_name` to something which is 1) only all lowercase letters, numbers and dashes; 2) is unique to you; 3) and ends in `-noconnect`
-  2. In the `hashi_tags` line change `owner` to be your email address.
-  3. Change `ssh_key_name` to the name of the key identified in "Requirement 4"
+  1. Change the `project_name` to something as below:
+     - It should be unique to you.
+     - It should be lowercase alphaneumeric, and hyphens is ok.
+  2. In the `hashi_tags` line change `owner` to be your email address.  
+     **Important**: The combination of `project_name` and `owner` must be unique within your AWS organization. They are used to set Consul cluster membership.
 
-    The combination of `project_name` and `owner` **must be unique within your AWS organization** --- they are used to set the Consul cluster membership when those instances start up.
+  3. Change `ssh_key_name` to the name of an already existing SSH Keypair in AWS.
   4. Optionally, specify your own IP address (`["<your_ip_address>/32"]`)  for the variable `security_group_ingress`. This is only needed if you want to access Vault and/or Consul UI. You can visit [http://whatismyip.akamai.com](http://whatismyip.akamai.com) to find your IP address.
 
 4. Save your changes to the `terraform.auto.tfvars` file
@@ -59,7 +64,7 @@ This will take a couple minutes to run. Once the command prompt returns, wait a 
 ### Service Discovery
 
  1. `terraform output webclient_servers`
- 2. `ssh ubuntu@<first ip returned>`
+ 2. `ssh ubuntu@<first_dns_returned>`
     1. When asked `Are you sure you want to continue connecting (yes/no)?` answer `yes` and hit enter
  3. `cat /lib/systemd/system/web_client.service`
     1. The line `Environment=LISTING_URI=http://listing.service.consul:8000` tells `web_client` how to talk to the `listing` service
@@ -82,7 +87,7 @@ Try adding `-detailed` to see additional kv metadata: `consul kv get -detailed p
 
 #### Service Configuration for Product service
   - On your terminal, exit out of the web_client SSH session and issue: `terraform output product_api_servers`
-  - `ssh ubuntu@<first ip returned>`
+  - `ssh ubuntu@<first_dns_returned>`
   - View product service configuration using the `-recurse` option to view all key / value pairs:
   ```
   consul kv get -recurse product/config
@@ -99,11 +104,11 @@ Try adding `-detailed` to see additional kv metadata: `consul kv get -detailed p
   ```
   source = "/opt/product-service/config.ctpl"
   ```
-  - If you display the above file it will show where consul-template pulls the configuration from: `cat /opt/product-service/config.ctpl`
+  - If you display the above file it will show where consul-template pulls the configuration from: `cat /opt/product-service/config.ctpl`. You will notice a set of `keyOrDefault` entries. This tells Consul-template to look for the specified key in Consul's distributed key/value store, then render the corresponding value. If the specified key is not found, then Consul-template will use the default value.
 
 #### Service Configuration for Listing service
   - On your terminal, exit out of the Listing SSH session and issue: `terraform output listing_api_servers`
-  - `ssh ubuntu@<first ip returned>`
+  - `ssh ubuntu@<first_dns_returned>`
   - View product service configuration using the `-recurse` option to view all key / value pairs:
   ```
   consul kv get -recurse listing/config
@@ -111,26 +116,31 @@ Try adding `-detailed` to see additional kv metadata: `consul kv get -detailed p
   - Envconsul reads these values and launches the application as a subprocess with these Environment variables.
   - Lets modify the version string: `consul kv put listing/config/version 1.5`. Envconsul will restart the listing service with updated values.
   - You can see the update take effect using this command: `curl listing.service.consul:8000/metadata`
-  - The configuration for Envconsul can be seen here: `cat /opt/listing-service/listing_envconsul.hcl`.
+  - The configuration for Envconsul can be seen here: `cat /opt/listing-service/listing_envconsul.hcl`. Lets go over a few parameters in this file:
+    - `command = "/usr/bin/node /opt/listing-service/server.js"` tells Envconsul how to start the application.
+    - The `secret` stanza tells Envconsul to read the secret path `mongo/creds/catalog` from Vault. These are set as environment variables: `username` and `password`.
+    - The `prefix` stanza tells Envconsul to read all key value pairs on the path `listing/config` from Consul's distributed key / value store. These are set as environment variables: `DB_URL`, `DB_PORT`, `DB_NAME` and `DB_COLLECTION`.
 
 3. Switch to the web browser and refresh, the version strings should both say `'version': 1.5` now.
-  - Note: Envconsul and Consul-template are not required for distributed service configuration. While using these tools help with application integration, services can use Consul's REST API to read application configuration information.
+
+Note: Envconsul and Consul-template are not required for distributed service configuration. While using these tools help with application integration, services can use Consul's REST API to read application configuration information.
 
 ### Dynamic Credentials
 
 This demo uses Vault's [AWS EC2 Authentication method](https://www.vaultproject.io/docs/auth/aws.html#ec2-auth-method) with the [Mongo DB Database Secrets Engine](https://www.vaultproject.io/docs/secrets/databases/mongodb.html#mongodb-database-secrets-engine).
 - On your terminal, exit out of the Listing SSH session and issue: `terraform output vault_servers`
-- `ssh ubuntu@<first ip returned>`
-- For this demo, the Vault toot token is placed in the /tmp directory with a [random_pet]() filename that ends in `_root_token`.
-Let use this root token to setup Vault CLI access:
+- `ssh ubuntu@<first_dns_returned>`
+
+For this demo, the environment variables `VAULT_ADDR` and `VAULT_TOKEN` have setup already.
+- Issue the following commands to view Vault server status. We have a single server install for this demo.
 ```
-export VAULT_ADDR="http://vault.service.consul:8200"
-export VAULT_TOKEN=$(cat /tmp/*_root_token)
+vault status
+```
+- Display the token that was setup; you will see `path auth/token/root` which indicates this is the root token.
+```
 vault token lookup
 ```
-You should see `path auth/token/root`
-
-  - Note: storing the root token in `/tmp` is only done for demo purposes, the root token should be secured per [Vault Production hardening steps](https://learn.hashicorp.com/vault/operations/production-hardening).
+  - Note: The root token should be secured per [Vault Production hardening steps](https://learn.hashicorp.com/vault/operations/production-hardening).
 
 - Display Vault's Authentication methods, the AWS authentication method is mounted under default `aws` path:
 ```
@@ -149,8 +159,13 @@ Now lets review how each service renews credentials:
   - _(Optional) View the [init\_listing.tpl](init\_listing.tpl) see this process._
 
 - Envconsul obtains a Vault token, then reads the MongoDB credential from the path: `mongo/creds/catalog`.
-- Lets read these credentials by issuing: `vault read mongo/creds/catalog`
-- Note that the TTL is only 2 mins.
+
+- Similarly, we can obtain a new set of credentials from the CLI:
+```
+vault read mongo/creds/catalog
+```
+Note that the TTL is only 2 mins which means Vault will auto revoke these credentials after that time.
+
 - Lets go ahead and revoke all leases for mongo:
 ```
 curl \
@@ -164,7 +179,7 @@ Now refresh the web browser and the Listing service should stop working. Envcons
 
 #### Dynamic Credentials for Product service
 - SSH into the product service and issue: `terraform output product_api_servers`
-- `ssh ubuntu@<first ip returned>`
+- `ssh ubuntu@<first_dns_returned>`
 - The product service uses [Vault hvac Python SDK](https://github.com/hvac/hvac) to authenticate with the Vault server. It obtains a Vault token, then reads the MongoDB credential from the path: `mongo/creds/catalog`.
 - You can view the code to do this: `cat /opt/product-service/vaultawsec2.py`. The relevant authentication flow is: `get_mongo_creds() --> get_vault_client --> auth_ec2`.
 - View the main code for product service: `cat /opt/product-service/product.py` and inspect the function `get_products_from_db()`. You will notice a retry logic built-in where if authentication fails (e.g. expired credentials), it will try to obtain a new credential:

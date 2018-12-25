@@ -1,7 +1,7 @@
 exec {
   # This is the command to execute as a child process. There can be only one
   # command per process.
-  command = "/opt/listing-service/listing_wrapper.sh"
+  command = "/usr/bin/node /opt/listing-service/server.js"
   splay = "5s"
 
   env {

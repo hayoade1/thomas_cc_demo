@@ -6,17 +6,17 @@
 # of this in a single AWS account, you'll need to make these
 # distinct to keep the instances separate.
 
-project_name    = "thomas-cc-demo"
-hashi_tags      = { "TTL" = "48", owner = "thomas@hashicorp.com", "project" = "Thomas Consul Connect Demo" }
+project_name    = "service-configuration-demo"
+hashi_tags      = { "TTL" = "48", owner = "kawsar@hashicorp.com", "project" = "Service Configuration demo" }
 
-# Images currently only exist in "us-east-1"
+# Packer images currently only exist in "us-east-1"
 aws_region      = "us-east-1"
 
-# This is the name of an already existing SSH Keypair in AWS
+# This is the name of an already existing SSH Keypair in AWS in the above AWS region
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html
-ssh_key_name    = "thomas-yubikey"
+ssh_key_name    = "your-aws-ssh-key-pair"
 
 # (Optional) Add your IP external address here so you can access the Vault and Consul UI:
-# 1.1.1.1 is just an example IP (Happens to be Cloudflare DNS)
-# You can use the command `curl -s http://whatismyip.akamai.com` to find it
-# security_group_ingress = ["1.1.1.1/32"]
+# 1.1.1.1 is just an example IP (it happens to be Cloudflare DNS)
+# You can use the command `curl -s http://whatismyip.akamai.com` to find your IP address.
+security_group_ingress = ["1.1.1.1/32"]

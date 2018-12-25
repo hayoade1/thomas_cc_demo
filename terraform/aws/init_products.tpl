@@ -7,9 +7,13 @@ systemctl stop product.service
 # Install hvac:
 pip3 install hvac
 
+# Download application
+cd /tmp
+git clone https://github.com/kawsark/thomas_cc_demo.git
+cp -r /tmp/thomas_cc_demo/application/product-service /opt
+
 # Create application directory and create a PID file:
 cd /opt
-git clone -b hvac https://github.com/kawsark/product-service.git
 chown -R ubuntu:ubuntu /opt/product-service
 chmod a+x /opt/product-service/product_wrapper.sh
 touch /tmp/product-service.pid
